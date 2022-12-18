@@ -4,6 +4,7 @@ import HandTrackingModuleFull as htm
 import time
 import autopy
 
+
 ##########################
 wCam, hCam = 640, 480
 frameR = 100  # Frame Reduction
