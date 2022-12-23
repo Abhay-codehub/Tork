@@ -20,7 +20,7 @@ while True:
         for handlandmark in results.multi_hand_landmarks:
             for id, lm in enumerate(handlandmark.landmark):
                 h, w, _ = img.shape
-                cx, cy = int(lm.x * w), int(lm.y * h)
+                cx, cy= int(lm.x * w), int(lm.y * h)
                 lmList.append([id, cx, cy])
                 mpDraw.draw_landmarks(img, handlandmark, mpHands.HAND_CONNECTIONS)
             if lmList != []:
@@ -30,7 +30,7 @@ while True:
                 cv2.circle(img, (x2, y2), 7, (255, 0, 0), cv2.FILLED)
                 cv2.line(img, (x1, y1), (x2, y2), (255, 0, 0), 3)
                 length = hypot(x2 - x1, y2 - y1)
-                bright = np.interp(length,[15,220],[0,100])
+                bright = np.interp(cy,[250,350],[100,20])
                 print (bright,length)
                 sbc.set_brightness(int(bright))
 
