@@ -3,6 +3,7 @@ import numpy as np
 import HandTrackingModuleFull as htm
 import time
 import autopy
+import pyautogui
 
 
 ##########################
@@ -32,6 +33,7 @@ while True:
     if len(lmList) != 0:
         x1, y1 = lmList[8][1:]
         x2, y2 = lmList[12][1:]
+        # x3, y3 = lmList[]
         # print(x1, y1, x2, y2)
 
     # 3. Check which fingers are up
@@ -40,10 +42,10 @@ while True:
         cv2.rectangle(img, (frameR, frameR), (wCam - frameR, hCam - frameR),
                       (255, 0, 255), 2)
         # 4. Only Index Finger : Moving Mode
-        if fingers[1] == 1 and fingers[2] == 0:
+        if fingers[1] ==  1 and fingers[2] == 1:
             # 5. Convert Coordinates
-            x3 = np.interp(x1, (frameR, wCam - frameR), (0, wScr))
-            y3 = np.interp(y1, (frameR, hCam - frameR), (0, hScr))
+            x3 = np.interp(x2, (frameR, wCam - frameR), (0, wScr))
+            y3 = np.interp(y2, (frameR, hCam - frameR), (0, hScr))
             # 6. Smoothen Values
             clocX = plocX + (x3 - plocX) / smoothening
             clocY = plocY + (y3 - plocY) / smoothening
@@ -57,12 +59,21 @@ while True:
         if fingers[1] == 1 and fingers[2] == 1:
             # 9. Find distance between fingers
             length, img, lineInfo = detector.findDistance(8, 12, img)
+            length1, img, lineInfo1 = detector.findDistance(4, 8, img)
+            print(length1)
+
             # print(length)
             # 10. Click mouse if distance short
             if length < 40:
                 cv2.circle(img, (lineInfo[4], lineInfo[5]),
                            15, (0, 255, 0), cv2.FILLED)
-                autopy.mouse.click()
+                pyautogui.click(button='left')
+                # time.sleep(5)
+            if length1 < 40:
+                cv2.circle(img, (lineInfo[3], lineInfo[0]),
+                           15, (0, 255, 255), cv2.FILLED)
+                pyautogui.click(button='right')
+                # time.sleep(5)
 
     # 11. Frame Rate
     cTime = time.time()
