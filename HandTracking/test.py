@@ -50,7 +50,7 @@ while True:
 
         length = hypot(x2 - x1, y2 - y1)
         # print("Length", length)
-####
+#####
         if length < 30:
             cv2.circle(img, (cx, cy), 7, (0, 255, 0), cv2.FILLED)
             # print("CX CY: ", cx, cy)
