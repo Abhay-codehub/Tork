@@ -42,6 +42,7 @@ while True:
         x1, y1 = lmList[4][1], lmList[4][2]
         x2, y2 = lmList[8][1], lmList[8][2]
         cx, cy = (x1 + x2) // 2, (y2 + y1) // 2
+        print(-y1)
 
         cv2.circle(img, (x1, y1), 7, (255, 0, 0), cv2.FILLED)
         cv2.circle(img, (x2, y2), 7, (255, 0, 0), cv2.FILLED)
@@ -49,12 +50,12 @@ while True:
 
         length = hypot(x2 - x1, y2 - y1)
         # print("Length", length)
-##
+###
         if length < 30:
             cv2.circle(img, (cx, cy), 7, (0, 255, 0), cv2.FILLED)
-            print("CX CY: ", cx, cy)
-            vol = np.interp(cy, [250, 350], [20, 100])
-            print(vol)
+            # print("CX CY: ", cx, cy)
+            vol = np.interp(-cy, [-350, -250], [20, 100])
+            # print(vol)
             # volume.SetMasterVolumeLevel(vol, None)
             sbc.fade_brightness(vol)
 
