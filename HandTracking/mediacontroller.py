@@ -3,7 +3,7 @@ import mediapipe as mp
 import pyautogui
 import time
 
-
+#
 def count_fingers(lst):
     cnt = 0
 
