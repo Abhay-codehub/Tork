@@ -33,12 +33,21 @@ while True:
     if len(lmList) != 0:
         x1, y1 = lmList[8][1:]
         x2, y2 = lmList[12][1:]
-        # x3, y3 = lmList[]
+        x3, y3 = lmList[16][1:]
+        x4, y4 = lmList[20][1:]
         # print(x1, y1, x2, y2)
 
     # 3. Check which fingers are up
         fingers = detector.fingersUp()
         # print(fingers)
+        a = fingers[1]
+        b = fingers[2]
+        c = fingers[3]
+        d = fingers[4]
+        e = fingers[0]
+        tot = a+b+c+d+e
+        print(tot)
+
         cv2.rectangle(img, (frameR, frameR), (wCam - frameR, hCam - frameR),
                       (255, 0, 255), 2)
         # 4. Only Index Finger : Moving Mode
@@ -52,7 +61,7 @@ while True:
 
             # 7. Move Mouse
             autopy.mouse.move(wScr - clocX, clocY)
-            cv2.circle(img, (x1, y1), 15, (255, 0, 255), cv2.FILLED)
+            cv2.circle(img, (x1, y1), 10, (255, 0, 255), cv2.FILLED)
             plocX, plocY = clocX, clocY
 
         # 8. Both Index and middle fingers are up : Clicking Mode
@@ -60,20 +69,33 @@ while True:
             # 9. Find distance between fingers
             length, img, lineInfo = detector.findDistance(8, 12, img)
             length1, img, lineInfo1 = detector.findDistance(4, 8, img)
-            print(length1)
+            length2, img, lineInfo2 = detector.findDistance(15, 20, img)
+            # print(length2)
 
             # print(length)
             # 10. Click mouse if distance short
+
             if length < 40:
                 cv2.circle(img, (lineInfo[4], lineInfo[5]),
-                           15, (0, 255, 0), cv2.FILLED)
-                pyautogui.click(button='left')
+                           10, (0, 255, 0), cv2.FILLED)
+                pyautogui.click(button='left', _pause=60)
                 # time.sleep(5)
             if length1 < 40:
                 cv2.circle(img, (lineInfo[3], lineInfo[0]),
-                           15, (0, 255, 255), cv2.FILLED)
+                           10, (0, 255, 255), cv2.FILLED)
                 pyautogui.click(button='right')
                 # time.sleep(5)
+            if length2 < 36:
+                cv2.circle(img, (lineInfo[3], lineInfo[0]),
+                           10, (0, 255, 255), cv2.FILLED)
+                pyautogui.mouseDown();
+
+        if tot == 0 :
+            pyautogui.scroll(-10)
+
+        if tot == 1 :
+            pyautogui.scroll(10)
+
 
     # 11. Frame Rate
     cTime = time.time()
