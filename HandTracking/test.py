@@ -1,72 +1,86 @@
 import cv2
-import mediapipe as mp
-from math import hypot
-from ctypes import cast, POINTER
-from comtypes import CLSCTX_ALL
-from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 import numpy as np
+import HandTrackingModuleFull as htm
 import time
-import screen_brightness_control as sbc
+import autopy
+import pyautogui
 
 
+##########################
+wCam, hCam = 640, 480
+frameR = 100  # Frame Reduction
+smoothening = 7
+#########################
 
+pTime = 0
+plocX, plocY = 0, 0
+clocX, clocY = 0, 0
 
 cap = cv2.VideoCapture(0)
-
-mpHands = mp.solutions.hands
-hands = mpHands.Hands()
-mpDraw = mp.solutions.drawing_utils
-
-devices = AudioUtilities.GetSpeakers()
-interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-volume = cast(interface, POINTER(IAudioEndpointVolume))
-
-volMin, volMax = volume.GetVolumeRange()[:2]
-pTime = 0
+cap.set(3, wCam)
+cap.set(4, hCam)
+detector = htm.handDetector(maxHands=1)
+wScr, hScr = autopy.screen.size()
+# print(wScr, hScr)
 
 while True:
+    # 1. Find hand Landmarks
     success, img = cap.read()
-    imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    results = hands.process(imgRGB)
+    img = detector.findHands(img)
+    lmList, bbox = detector.findPosition(img)
 
-    lmList = []
-    if results.multi_hand_landmarks:
-        for handlandmark in results.multi_hand_landmarks:
-            for id, lm in enumerate(handlandmark.landmark):
-                h, w, _ = img.shape
-                cx, cy = int(lm.x * w), int(lm.y * h)
-                lmList.append([id, cx, cy])
-            mpDraw.draw_landmarks(img, handlandmark, mpHands.HAND_CONNECTIONS)
+    # 2. Get the tip of the index and middle fingers
+    if len(lmList) != 0:
+        x1, y1 = lmList[8][1:]
+        x2, y2 = lmList[12][1:]
+        # x3, y3 = lmList[]
+        # print(x1, y1, x2, y2)
 
-    if lmList != []:
-        x1, y1 = lmList[4][1], lmList[4][2]
-        x2, y2 = lmList[8][1], lmList[8][2]
-        cx, cy = (x1 + x2) // 2, (y2 + y1) // 2
-        print(-y1)
+    # 3. Check which fingers are up
+        fingers = detector.fingersUp()
+        # print(fingers)
+        cv2.rectangle(img, (frameR, frameR), (wCam - frameR, hCam - frameR),
+                      (255, 0, 255), 2)
+        # 4. Only Index Finger : Moving Mode
+        if fingers[1] ==  1 and fingers[2] == 1:
+            # 5. Convert Coordinates
+            x3 = np.interp(x2, (frameR, wCam - frameR), (0, wScr))
+            y3 = np.interp(y2, (frameR, hCam - frameR), (0, hScr))
+            # 6. Smoothen Values
+            clocX = plocX + (x3 - plocX) / smoothening
+            clocY = plocY + (y3 - plocY) / smoothening
 
-        cv2.circle(img, (x1, y1), 7, (255, 0, 0), cv2.FILLED)
-        cv2.circle(img, (x2, y2), 7, (255, 0, 0), cv2.FILLED)
-        cv2.line(img, (x1, y1), (x2, y2), (255, 0, 0), 3)
+            # 7. Move Mouse
+            autopy.mouse.move(wScr - clocX, clocY)
+            cv2.circle(img, (x1, y1), 15, (255, 0, 255), cv2.FILLED)
+            plocX, plocY = clocX, clocY
 
-        length = hypot(x2 - x1, y2 - y1)
-        # print("Length", length)
-#####
-        if length < 30:
-            cv2.circle(img, (cx, cy), 7, (0, 255, 0), cv2.FILLED)
-            # print("CX CY: ", cx, cy)
-            vol = np.interp(-cy, [-350, -250], [20, 100])
-            # print(vol)
-            # volume.SetMasterVolumeLevel(vol, None)
-            sbc.fade_brightness(vol)
+        # 8. Both Index and middle fingers are up : Clicking Mode
+        if fingers[1] == 1 and fingers[2] == 1:
+            # 9. Find distance between fingers
+            length, img, lineInfo = detector.findDistance(8, 12, img)
+            length1, img, lineInfo1 = detector.findDistance(4, 8, img)
+            print(length1)
 
-        # Hand range 15 - 220
-        # Volume range -63.5 - 0.0
+            # print(length)
+            # 10. Click mouse if distance short
+            if length < 40:
+                cv2.circle(img, (lineInfo[4], lineInfo[5]),
+                           15, (0, 255, 0), cv2.FILLED)
+                pyautogui.click(button='left')
+                # time.sleep(5)
+            if length1 < 40:
+                cv2.circle(img, (lineInfo[3], lineInfo[0]),
+                           15, (0, 255, 255), cv2.FILLED)
+                pyautogui.click(button='right')
+                # time.sleep(5)
 
+    # 11. Frame Rate
     cTime = time.time()
     fps = 1 / (cTime - pTime)
     pTime = cTime
-    cv2.putText(img, f'FPS: {int(fps)}', (40, 50), cv2.FONT_HERSHEY_COMPLEX,
-                1, (255, 0, 0), 3)
-
-    cv2.imshow('Image', img)
+    cv2.putText(img, str(int(fps)), (20, 50), cv2.FONT_HERSHEY_PLAIN, 3,
+                (255, 0, 0), 3)
+    # 12. Display
+    cv2.imshow("Image", img)
     cv2.waitKey(1)

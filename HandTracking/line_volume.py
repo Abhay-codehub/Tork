@@ -2,6 +2,8 @@ import cv2
 import mediapipe as mp
 from math import hypot
 from ctypes import cast, POINTER
+
+import screen_brightness_control as sbc
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 import numpy as np
@@ -54,6 +56,13 @@ while True:
             vol = np.interp(cx, [250, 350], [volMin, volMax])
             print(vol)
             volume.SetMasterVolumeLevel(vol, None)
+
+        if length < 30:
+            cv2.circle(img, (cx, cy), 7, (0, 255, 0), cv2.FILLED)
+            # print("CX CY: ", cx, cy)
+            brit = np.interp(-cy, [-350, -250], [20, 100])
+            # print(vol)
+            sbc.fade_brightness(brit)
 
 
         # Hand range 15 - 220
