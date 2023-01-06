@@ -58,12 +58,14 @@ while True:
         x33, y33 = lmList[16][1:]
         x4, y4 = lmList[20][1:]
         x5, y5 = lmList[4][1:]
+        x6, y6 = lmList[15][1:]
 
         x11, y11 = lmList[4][1], lmList[4][2]
         x22, y22 = lmList[8][1], lmList[8][2]
-        cx, cy = (x11 + x22) // 2, (y11 + y22) // 2
 
-        cx2, cy2 = (x1 + x5) // 2, (y1 + y5) // 2
+        cx, cy = (x11 + x22) // 2, (y11 + y22) // 2
+        cx2, cy2 = (x33 + x2) // 2, (y33 + y2) // 2
+        cx3, cy3 = (x6+x4) // 2, (y6+y4) // 2
 
         lengthvol = hypot(x22 - x11, y22 - y11)
 
@@ -100,36 +102,36 @@ while True:
             length1, img, lineInfo1 = detector.findDistance(12, 16, img)
             length2, img, lineInfo2 = detector.findDistance(15, 20, img)
 
-            if length < 35:
+            if length < 40:
                 cv2.circle(img, (lineInfo[4], lineInfo[5]),
                            10, (0, 255, 0), cv2.FILLED)
                 autopy.mouse.click()
 
-            if length1 < 27:
+            if length1 < 35:
                 cv2.circle(img, (cx2, cy2),
-                           10, (0, 255, 255), cv2.FILLED)
+                           10, (0, 255, 0), cv2.FILLED)
                 pyautogui.click(button='right')
 
 
-            if length2 < 25:
-                cv2.circle(img, (lineInfo[3], lineInfo[0]),
-                           10, (0, 255, 255), cv2.FILLED)
+            if length2 < 35:
+                cv2.circle(img, (cx3, cy3),
+                           10, (0, 255, 0), cv2.FILLED)
                 pyautogui.mouseDown()
 
-            if lengthvol < 30:
-                if(y1>270):
-                    cv2.circle(img, (cx, cy), 7, (0, 255, 0), cv2.FILLED)
-                    vol = np.interp(cx, [250, 350], [volMin, volMax])
+        if lengthvol < 30:
+            if(y1>270):
+                cv2.circle(img, (cx, cy), 7, (0, 255, 0), cv2.FILLED)
+                vol = np.interp(-cx, [-450, -250], [volMin, volMax])
 
-                    volume.SetMasterVolumeLevel(vol, None)
+                volume.SetMasterVolumeLevel(vol, None)
 
-            if lengthvol < 30:
-                if (y1 < 270):
-                    cv2.circle(img, (cx, cy), 7, (0, 255, 0), cv2.FILLED)
-                    brit = np.interp(-cy, [-200, -180], [20, 100])
-                    sbc.fade_brightness(brit)
+        if lengthvol < 30:
+            if (y1 < 270):
+                cv2.circle(img, (cx, cy), 7, (0, 255, 0), cv2.FILLED)
+                brit = np.interp(-cy, [-200, -180], [20, 100])
+                sbc.fade_brightness(brit)
 
-        # print(y1)
+        print(-cx)
 
         if fingers[0] == 0 and tot == 4:
             pyautogui.scroll(30)
