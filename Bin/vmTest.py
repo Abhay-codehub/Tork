@@ -130,10 +130,11 @@ while True:
                     sbc.fade_brightness(brit)
 
         # print(y1)
+
         if fingers[0] == 0 and tot == 4:
             pyautogui.scroll(30)
 
-        if fingers[1] == 0 and tot == 4:
+        if fingers[1] == 0 and tot == 4 and lengthvol > 40:
             pyautogui.scroll(-30)
 
 
@@ -149,9 +150,11 @@ while True:
                 if (fingers[0] == 1 and cnt == 1):
                     pyautogui.press("left")
 
-                if (fingers[1] == 1 and cnt == 2):
+                elif (fingers[1] == 1 and cnt == 2):
                     pyautogui.press("right")
 
+                elif (cnt == 0):
+                    pyautogui.press("space")
                 prev = cnt
                 start_init = False
 
